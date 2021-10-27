@@ -86,7 +86,7 @@ pagination_dir: page
 
 # Include / Exclude file(s)
 ## include:/exclude: options only apply to the 'source/' folder
-include:
+include: 
 exclude:
 ignore:
 
@@ -123,7 +123,7 @@ nav:
 # only 'mail' is an exception.
 social_links:
   github: https://github.com/BeanCookie
-  # mail: 724821454@qq.com
+  mail: luzhong256@gamil.com
 
 # Customize the copyright years
 # Note: if start_year/end_year not provided, will use current year.
