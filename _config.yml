@@ -135,7 +135,7 @@ copyright:
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: https://github.com/BeanCookie/BeanCookie.github.io
+  repo: git@github.com:BeanCookie/BeanCookie.github.io.git
   branch: master
 
 live2d:
