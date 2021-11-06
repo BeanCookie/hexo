@@ -9,7 +9,7 @@ tags:
 
 ### Flink是什么
 根据Flink官网的定义，Flink是一个框架和分布式处理引擎，用于在**无边界**和**有边界**数据流上进行**有状态**的计算。Flink能在所有常见集群环境中运行，并能以内存速度和任意规模进行计算。
-![https://beancookie.github.io/images/Flink简介-001.png](https://beancookie.github.io/images/Flink简介-001.png)
+![https://beancookie.github.io/images/Flink简介-01.png](https://beancookie.github.io/images/Flink简介-01.png)
 
 
 ### Flink的起源
@@ -19,10 +19,10 @@ Apache Flink是Apache开源软件基金会的一个顶级项目，和许多Apach
 Stratosphere项目于2010年发起，2014年5月Stratosphere项目被贡献到Apache软件基金会，作为孵化器项目进行孵化并更名为Flink。发展至今，Flink已成为Apache社区最活跃的大数据项目。它的用户与开发者邮件列表活跃度在2020年的Apache年度报告中排名第一。
 
 1. 社区邮件列表活跃度：TOP 1
-![https://beancookie.github.io/images/Flink简介-002.png](https://beancookie.github.io/images/Flink简介-002.png)
+![https://beancookie.github.io/images/Flink简介-02.png](https://beancookie.github.io/images/Flink简介-02.png)
 
 2. Commits 提交：TOP 2
-![https://beancookie.github.io/images/Flink简介-003.png](https://beancookie.github.io/images/Flink简介-003.png)
+![https://beancookie.github.io/images/Flink简介-03.png](https://beancookie.github.io/images/Flink简介-03.png)
 
 ### 为什么要学习Apache Flink
 
@@ -33,7 +33,7 @@ Stratosphere项目于2010年发起，2014年5月Stratosphere项目被贡献到Ap
 
 2. Flink已成为国内外实时计算事实标准
 目前国内外许多公司都在使用 Flink，国际公司有 Netflix、eBay，LinkedIn 等，国内有阿里巴巴、腾讯、美团、小米、快手等大型互联网公司。
-![https://beancookie.github.io/images/Flink简介-004.png](https://beancookie.github.io/images/Flink简介-004.png)
+![https://beancookie.github.io/images/Flink简介-04.png](https://beancookie.github.io/images/Flink简介-04.png)
 
 3. 随着流计算引擎的演进，Flink已成为新一代的计算引擎
 - 流计算引擎进行了很多代的演进，第一代流计算引擎 Apache Storm 是一个纯流的设计，延迟非常的低，但是它的问题也比较明显，即没有办法避免消息的重复处理，从而导致数据正确性有一定的问题。
