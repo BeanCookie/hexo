@@ -214,4 +214,12 @@ kubectl proxy
 
 > [http://localhost:8001/api/v1/namespaces/default/services/flink-jobmanager:webui/proxy/#/overview](http://localhost:8001/api/v1/namespaces/default/services/flink-jobmanager:webui/proxy/#/overview)
 
+![https://beancookie.github.io/images/Flink开发环境搭建-01.png](https://beancookie.github.io/images/Flink开发环境搭建-01.png)
+
 ### 清空Flink
+```bash
+kubectl delete -f flink-configuration-configmap.yaml
+kubectl delete -f jobmanager-session-deployment-non-ha.yaml
+kubectl delete -f taskmanager-session-deployment.yaml
+kubectl delete -f jobmanager-service.yaml
+```
