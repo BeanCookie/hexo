@@ -2,7 +2,7 @@
 title: Flink初探
 date: 2020-06-14 17:36:26
 categories:
-- 实时计算
+- Flink
 tags: 
 - Flink
 ---
