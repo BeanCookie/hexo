@@ -212,6 +212,6 @@ kubectl proxy
 
 ### 访问Flink UI
 
-> ![http://localhost:8001/api/v1/namespaces/default/services/flink-jobmanager:ui/proxy/#/overview](http://localhost:8001/api/v1/namespaces/default/services/flink-jobmanager:ui/proxy/#/overview)
+> [http://localhost:8001/api/v1/namespaces/default/services/flink-jobmanager:webui/proxy/#/overview](http://localhost:8001/api/v1/namespaces/default/services/flink-jobmanager:webui/proxy/#/overview)
 
 ### 清空Flink
