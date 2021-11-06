@@ -15,7 +15,73 @@ Kubernetes 中的基本 Flink 会话集群部署包含三个组件：
 - TaskManagers
 - 暴露JobManager的REST和UI端口的服务
 
-> jobmanager-deployment.yaml
+> flink-configuration-configmap.yaml
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: flink-config
+  labels:
+    app: flink
+data:
+  flink-conf.yaml: |+
+    jobmanager.rpc.address: flink-jobmanager
+    taskmanager.numberOfTaskSlots: 2
+    blob.server.port: 6124
+    jobmanager.rpc.port: 6123
+    taskmanager.rpc.port: 6122
+    queryable-state.proxy.ports: 6125
+    jobmanager.memory.process.size: 1600m
+    taskmanager.memory.process.size: 1728m
+    parallelism.default: 2    
+  log4j-console.properties: |+
+    # This affects logging for both user code and Flink
+    rootLogger.level = INFO
+    rootLogger.appenderRef.console.ref = ConsoleAppender
+    rootLogger.appenderRef.rolling.ref = RollingFileAppender
+
+    # Uncomment this if you want to _only_ change Flink's logging
+    #logger.flink.name = org.apache.flink
+    #logger.flink.level = INFO
+
+    # The following lines keep the log level of common libraries/connectors on
+    # log level INFO. The root logger does not override this. You have to manually
+    # change the log levels here.
+    logger.akka.name = akka
+    logger.akka.level = INFO
+    logger.kafka.name= org.apache.kafka
+    logger.kafka.level = INFO
+    logger.hadoop.name = org.apache.hadoop
+    logger.hadoop.level = INFO
+    logger.zookeeper.name = org.apache.zookeeper
+    logger.zookeeper.level = INFO
+
+    # Log all infos to the console
+    appender.console.name = ConsoleAppender
+    appender.console.type = CONSOLE
+    appender.console.layout.type = PatternLayout
+    appender.console.layout.pattern = %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n
+
+    # Log all infos in the given rolling file
+    appender.rolling.name = RollingFileAppender
+    appender.rolling.type = RollingFile
+    appender.rolling.append = false
+    appender.rolling.fileName = ${sys:log.file}
+    appender.rolling.filePattern = ${sys:log.file}.%i
+    appender.rolling.layout.type = PatternLayout
+    appender.rolling.layout.pattern = %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n
+    appender.rolling.policies.type = Policies
+    appender.rolling.policies.size.type = SizeBasedTriggeringPolicy
+    appender.rolling.policies.size.size=100MB
+    appender.rolling.strategy.type = DefaultRolloverStrategy
+    appender.rolling.strategy.max = 10
+
+    # Suppress the irrelevant (wrong) warnings from the Netty channel handler
+    logger.netty.name = org.apache.flink.shaded.akka.org.jboss.netty.channel.DefaultChannelPipeline
+    logger.netty.level = OFF
+```
+
+> jobmanager-session-deployment-non-ha.yaml
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -25,6 +91,7 @@ spec:
   replicas: 1
   selector:
     matchLabels:
+      app: flink
       component: jobmanager
   template:
     metadata:
@@ -34,24 +101,37 @@ spec:
     spec:
       containers:
       - name: jobmanager
-        image: flink:latest
-        args:
-        - jobmanager
+        image: apache/flink:1.13.2-scala_2.11
+        args: ["jobmanager"]
         ports:
         - containerPort: 6123
           name: rpc
         - containerPort: 6124
-          name: blob
-        - containerPort: 6125
-          name: query
+          name: blob-server
         - containerPort: 8081
-          name: ui
-        env:
-        - name: JOB_MANAGER_RPC_ADDRESS
-          value: flink-jobmanager
+          name: webui
+        livenessProbe:
+          tcpSocket:
+            port: 6123
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        volumeMounts:
+        - name: flink-config-volume
+          mountPath: /opt/flink/conf
+        securityContext:
+          runAsUser: 9999  # refers to user _flink_ from official flink image, change if necessary
+      volumes:
+      - name: flink-config-volume
+        configMap:
+          name: flink-config
+          items:
+          - key: flink-conf.yaml
+            path: flink-conf.yaml
+          - key: log4j-console.properties
+            path: log4j-console.properties
 ```
 
-> taskmanager-deployment.yaml
+> taskmanager-session-deployment.yaml
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -61,6 +141,7 @@ spec:
   replicas: 2
   selector:
     matchLabels:
+      app: flink
       component: taskmanager
   template:
     metadata:
@@ -70,19 +151,32 @@ spec:
     spec:
       containers:
       - name: taskmanager
-        image: flink:latest
-        args:
-        - taskmanager
+        image: apache/flink:1.13.2-scala_2.11
+        args: ["taskmanager"]
         ports:
-        - containerPort: 6121
-          name: data
         - containerPort: 6122
           name: rpc
         - containerPort: 6125
-          name: query
-        env:
-        - name: JOB_MANAGER_RPC_ADDRESS
-          value: flink-jobmanager
+          name: query-state
+        livenessProbe:
+          tcpSocket:
+            port: 6122
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        volumeMounts:
+        - name: flink-config-volume
+          mountPath: /opt/flink/conf/
+        securityContext:
+          runAsUser: 9999  # refers to user _flink_ from official flink image, change if necessary
+      volumes:
+      - name: flink-config-volume
+        configMap:
+          name: flink-config
+          items:
+          - key: flink-conf.yaml
+            path: flink-conf.yaml
+          - key: log4j-console.properties
+            path: log4j-console.properties
 ```
 
 > jobmanager-service.yaml
@@ -92,14 +186,13 @@ kind: Service
 metadata:
   name: flink-jobmanager
 spec:
+  type: ClusterIP
   ports:
   - name: rpc
     port: 6123
-  - name: blob
+  - name: blob-server
     port: 6124
-  - name: query
-    port: 6125
-  - name: ui
+  - name: webui
     port: 8081
   selector:
     app: flink
@@ -108,9 +201,11 @@ spec:
 
 ### 启动Flink
 ```bash
+kubectl create -f flink-configuration-configmap.yaml
+# Create the deployments for the cluster
+kubectl create -f jobmanager-session-deployment-non-ha.yaml
+kubectl create -f taskmanager-session-deployment.yaml
 kubectl create -f jobmanager-service.yaml
-kubectl create -f jobmanager-deployment.yaml
-kubectl create -f taskmanager-deployment.yaml
 
 kubectl proxy
 ```
@@ -118,3 +213,5 @@ kubectl proxy
 ### 访问Flink UI
 
 > ![http://localhost:8001/api/v1/namespaces/default/services/flink-jobmanager:ui/proxy/#/overview](http://localhost:8001/api/v1/namespaces/default/services/flink-jobmanager:ui/proxy/#/overview)
+
+### 清空Flink
