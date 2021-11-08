@@ -25,6 +25,40 @@ Task Slot 是一个 TaskManager 中的最小资源分配单位，一个 TaskMana
 
 ### 命令行运行jar
 
+1. 连接到K8S环境
+```bash
+kubectl get pod
+
+NAME                                READY   STATUS    RESTARTS   AGE
+flink-jobmanager-7f675c8869-fhb9m   1/1     Running   0          45h
+flink-taskmanager-8869bf445-4vdf4   1/1     Running   0          46h
+flink-taskmanager-8869bf445-bqn6x   1/1     Running   0          46h
+
+
+kubectl exec -it flink-taskmanager-8869bf445-4vdf4 bash
+
+./bin/flink run examples/streaming/WordCount.jar
+
+./bin/flink run examples/streaming/WordCount.jar --input ./README.txt  --output ./word_count_out.txt
+
+cat ./word_count_out.txt/1
+```
 ### UI界面上传jar
 
+```bash
+# 拷贝容器中的jar包
+docker ps
+
+CONTAINER ID   IMAGE          COMMAND                  CREATED        STATUS        PORTS     NAMES
+273f4ed76172   538a41938a2c   "/docker-entrypoint.…"   46 hours ago   Up 46 hours             k8s_jobmanager_flink-jobmanager-7f675c8869-fhb9m_default_c2a6453a-43ad-4f01-bf9f-362ee2d32e1a_0
+f7d1a54d374f   apache/flink   "/docker-entrypoint.…"   46 hours ago   Up 46 hours             k8s_taskmanager_flink-taskmanager-8869bf445-4vdf4_default_a4c32e5e-d4bd-484f-b5ba-a6c32bda34e1_0
+cec1f4dc93fa   apache/flink   "/docker-entrypoint.…"   46 hours ago   Up 46 hours             k8s_taskmanager_flink-taskmanager-8869bf445-bqn6x_default_27370fb4-16c0-4d60-8972-b66b891c07e0_0
+
+docker cp f7d1a54d374f:/opt/flink/examples/streaming/WordCount.jar .
+```
+
+#### 通过UI界面上传jar包
+![https://beancookie.github.io/images/运行Flink程序-04.png](https://beancookie.github.io/images/运行Flink程序-04.png)
+
+![https://beancookie.github.io/images/运行Flink程序-05.png](https://beancookie.github.io/images/运行Flink程序-05.png)
 ### 开发工具调试开发
