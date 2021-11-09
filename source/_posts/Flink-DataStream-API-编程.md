@@ -2,7 +2,7 @@
 title: Flink DataStream API 编程
 date: 2020-07-17 10:13:18
 categories:
-- 实时计算
+- Flink
 tags: 
 - Flink
 ---
