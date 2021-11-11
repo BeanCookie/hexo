@@ -167,8 +167,8 @@ Rule weatherRule2 = new SpELRule()
         .then("#{ T(example.RuleApp).printRain(\"It rains, take an umbrella!\") }");
 
 Facts facts = new Facts();
-facts.put("rain", false);
-facts.put("wind", false);
+facts.put("rain", true);
+facts.put("wind", true);
 // facts.put("rain", false);
 // facts.put("wind", false);
 
