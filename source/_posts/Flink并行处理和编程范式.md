@@ -23,3 +23,39 @@ tags:
 ![https://beancookie.github.io/images/Flink并行处理和编程范式-01.png](https://beancookie.github.io/images/Flink并行处理和编程范式-01.png)
 
 在图中，处理工序A的员工，假设还承担了一些额外任务，比如把面粉搬运到厨房；负责工序C的员工也有额外任务，就是等所有员工把面包制作好后，还需将面包搬运到商店货架。据此，可以把图中所有的节点划分为三个类别。第一个类别；第二类是数据处理节点；它们大多时候不需要和外部系统打交道；最后一个类别负责将整个计算逻辑写到某个外部系统。这三类节点分别就是Source节点、Transform节点和Sink节点。
+
+### 编程范式
+
+假设有一个数据集，其中包含 1~10 十个数字，如果把每一个数字都乘以 2并做累计求和操作，怎么实现呢？办法有很多，如果用编程来解决有两个角度：
+
+1. 命令式编程
+
+   一步一步的相当 于告诉机器应该怎样生成一些数据结构，怎样的用这些数据结构去存储一些临时的中 间结果，怎样把这些中间结果再转换成为最终的结果，相当于一步一步告诉机器如何去做。
+
+   ```java
+   int[] numbers = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+   int sum = 0;
+   for (int i = 0; i < numbers.length; i++) {
+       numbers[i] = numbers[i] * 2;
+       sum += numbers[i];
+   }
+   System.out.println(sum);
+   ```
+
+2. 声明式编程
+
+   声明式编程里通常只需要告诉机器去完成怎样的任务，而不需要像命令式那样详细传递。
+
+   ```java
+   int sum = Stream.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10).map(x -> x * 2).mapToInt(x -> x).sum();
+   System.out.println(sum);
+   ```
+
+### Flink对多范式的支持
+
+#### FlinkAPI概览
+![https://beancookie.github.io/images/Flink并行处理和编程范式-02.png](https://beancookie.github.io/images/Flink并行处理和编程范式-02.png)
+
+在旧版本的 Flink 里，它的API层次是自上而下的。最上层表示我们可以用比较高级的API，或者说声明程度更高的Table API以及SQL的方式来编写逻辑。所有SQL和Table API编写的内容都会被Flink内部翻译和优化成一个用DataStream API实现的程序。再往下一层，DataStream API 的程序会被表示成为一系列Transformation，最终Transformation会被翻译成JobGraph。
+
+新版本的Flink在流批一体这一目标的引导下，Flink现在已经对底层的算子、调度、Shuffle 进行了统一的抽象，以统一的方式向上支持 DataStream API和Table API两套接口。 DataStream API是一种比较偏物理层的接口，Table API是一种 Declearetive 的接口， 这两套接口对流和批来说都是统一的。
