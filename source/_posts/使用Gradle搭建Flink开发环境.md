@@ -9,7 +9,7 @@ tags:
 ---
 
 ### Gradle配置文件
-```gradle
+```groovy
 // build.gradle
 
 buildscript {
